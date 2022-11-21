@@ -61,7 +61,7 @@ app.use(json())
 // Récupérer tous les jeux
 app.get("/games", (request, response) => {
     Games.find()
-    .select("Name Price Rating")
+    .select("Name Price Rating Image")
     .then((games) => {response.send(games)})
     .catch(() => response.status(404).end())
 })
