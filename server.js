@@ -28,7 +28,7 @@ const gameSchema = new Schema({
     Image: String
 });
 
-const Games = mongoose.model("Games", gameSchema);
+/*const Games = mongoose.model("Games", gameSchema);
 
 // Create a new game
 var dataGames = [
@@ -52,7 +52,7 @@ Games.insertMany(dataGames).then((e)=>{
     console.log("Data inserted")
 }).catch((e) =>{
     console.log("Error while inserting data")
-});
+});*/
 
 // Création du serveur et initialisation
 const app = express()
@@ -61,6 +61,7 @@ app.use(json())
 // Récupérer tous les jeux
 app.get("/games", (request, response) => {
     Games.find()
+    .select("Name Price Rating")
     .then((games) => {response.send(games)})
     .catch(() => response.status(404).end())
 })
