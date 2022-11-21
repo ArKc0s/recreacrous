@@ -128,15 +128,23 @@ app.post("/cart", (request, response) => {
 app.post("/cart/:id/:gameid", async (request, response) => {
  
     const cart = await Cart.findByIdAndUpdate(request.params.id)
+    let found = false
 
-    if(request.params.gameid in cart.games) {
-        cart.games[request.params.gameid].Quantity += 1
-    } else {
+    cart.games.map(game => {
+        if(game._id == request.params.gameid){
+            found = true
+            game.Quantity += 1
+            cart.save()
+            return response.send(cart)
+        }
+    })
+    if (found == false){
         const gameincart = await Games.findById(request.params.gameid).select("Name Price Image")   
         gameincart.Quantity = 1
         cart.games.push(gameincart)
+        await cart.save().then((cart) => { response.send(cart)})
     }
-    cart.save().then((cart) => { response.send(cart)})
+ 
 })
 
 
