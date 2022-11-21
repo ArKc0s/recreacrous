@@ -60,40 +60,37 @@ app.use(json())
 
 // Récupérer tous les jeux
 app.get("/games", (request, response) => {
-    Games.find().then((games) => {
-        response.send(games)
-    })
+    Games.find()
+    .then((games) => {response.send(games)})
+    .catch(() => response.status(404).end())
 })
 
 // Récupérer un jeu
-app.get("/games/:id", (request, response) => {
-    Games.findById(request.params.id).then((game) => {
-        response.send(game)
-    })
+app.get("/game/:id", (request, response) => {
+    Games.findById(request.params.id)
+    .then((game) => {response.send(game)})
+    .catch(() => response.status(404).end())
 })
 
 // Ajouter un jeu
-app.post("/games", (request, response) => {
+app.post("/game", (request, response) => {
     const game = new Games(request.body)
-    game.save().then((game) => {
-        response.send(game)
-    })
+    game.save().then((game) => { response.send(game)})
 })
 
 // Modifier un jeu
 app.put("/games/:id", (request, response) => {
-    Games.findByIdAndUpdate(request.params.id, request.body).then(() => {
-        response.sendStatus(200)
-    })
+    Games.findByIdAndUpdate(request.params.id, request.body)
+    .then(() => {response.sendStatus(200)})
+    .catch(() => response.status(404).end())
 })
 
 // Supprimer un jeu
 app.delete("/games/:id", (request, response) => {
-    Games.findByIdAndDelete(request.params.id).then(() => {
-        response.sendStatus(200)
-    })
+    Games.findByIdAndDelete(request.params.id)
+    .then(() => {response.sendStatus(200)})
+    .catch(() => response.status(404).end())
 })
-
 
 // Lancement du serveur
 app.listen(3000, () => {
