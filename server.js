@@ -74,6 +74,8 @@ const Cart = mongoose.model("Cart", cartSchema);
 const app = express()
 app.use(json())
 
+// Affichage des jeux 
+
 // Récupérer tous les jeux
 app.get("/games", (request, response) => {
     Games.find()
@@ -87,6 +89,9 @@ app.get("/game/:id", (request, response) => {
     .then((game) => {response.send(game)})
     .catch(() => response.status(404).end())
 })
+
+
+// Base de données des jeux
 
 // Ajouter un jeu
 app.post("/game", (request, response) => {
@@ -108,6 +113,7 @@ app.delete("/game/:id", (request, response) => {
     .catch(() => response.status(404).end())
 })
 
+// Panier
 
 // Afficher le panier
 app.get("/cart/:id", (request, response) => {
