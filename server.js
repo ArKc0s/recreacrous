@@ -149,17 +149,31 @@ app.post("/cart/:id/:gameid", async (request, response) => {
 
 
 // Vider le panier
-app.delete("/cart/:id", (request, response) => {
-    Cart.findOneAndUpdate({id: request.params.id}, {$pull: {games: request.body}})
+app.delete("/cart/:id", async (request, response) => {
+    const cart = await Cart.findOneAndUpdate({id: request.params.id}, {games: []})
     .then(() => {response.sendStatus(200)})
     .catch(() => response.status(404).end())
 })
 
 // Supprimer un élément du panier
-app.delete("/cart/:id/:gameid", (request, response) => {
-    Cart.findOneAndUpdate({id: request.params.id}, {$pull: {games: {id: request.params.gameid}}})
-    .then(() => {response.sendStatus(200)})
-    .catch(() => response.status(404).end())
+// TODO
+
+app.delete("/cart/:id/:gameid", async (request, response) => {
+    const cart = await Cart.findById(request.params.id)
+    cart.games.map(game => {
+        if(game._id == request.params.gameid){
+            if (game.Quantity > 1){
+                game.Quantity -= 1
+                cart.save()
+                return response.send(cart)
+            }
+            else{
+                Cart.findOneAndUpdate({id: request.params.id}, {$pull: {games: {_id: request.params.gameid}}})
+                .then(() => {response.sendStatus(200)})
+                .catch(() => response.status(404).end())
+            }
+        }
+    })
 })
 
 // Lancement du serveur
