@@ -72,7 +72,7 @@ const Cart = mongoose.model("Cart", cartSchema);
 
 // Création du serveur et initialisation
 const app = express()
-app.use(json())
+app.use(express.json())
 
 // Affichage des jeux 
 
@@ -122,22 +122,21 @@ app.get("/cart/:id", (request, response) => {
     .catch(() => response.status(404).end())
 })
 
-// Ajouter un panier
-// TODO
-app.post("/cart", (request, response) => {
+// Créer un panier
+app.post("/newcart", (request, response) => {
     const cart = new Cart(request.body)
     cart.save().then((cart) => { response.send(cart)})
 })
 
 
 // Ajouter un jeu au panier
-app.post("/cart/:id/:gameid", async (request, response) => {
+app.post("/cart", async (request, response) => {
  
-    const cart = await Cart.findByIdAndUpdate(request.params.id)
+    const cart = await Cart.findById(request.body.id)
     let found = false
 
     cart.games.map(game => {
-        if(game._id == request.params.gameid){
+        if(game._id == request.body.gameid){
             found = true
             game.Quantity += 1
             cart.save()
@@ -145,7 +144,7 @@ app.post("/cart/:id/:gameid", async (request, response) => {
         }
     })
     if (found == false){
-        const gameincart = await Games.findById(request.params.gameid).select("Name Price Image")   
+        const gameincart = await Games.findById(request.body.gameid).select("Name Price Image")   
         gameincart.Quantity = 1
         cart.games.push(gameincart)
         await cart.save().then((cart) => { response.send(cart)})
@@ -155,31 +154,52 @@ app.post("/cart/:id/:gameid", async (request, response) => {
 
 
 // Vider le panier
-app.delete("/cart/:id", async (request, response) => {
-    const cart = await Cart.findOneAndUpdate({id: request.params.id}, {games: []})
+app.delete("/emptycart", async (request, response) => {
+    const cart = await Cart.findOneAndUpdate({"_id": request.body.id}, {$set: {games: []}})
     .then(() => {response.sendStatus(200)})
     .catch(() => response.status(404).end())
 })
 
 // Supprimer un élément du panier
-// TODO
-
-app.delete("/cart/:id/:gameid", async (request, response) => {
-    const cart = await Cart.findById(request.params.id)
+app.delete("/cart", async (request, response) => {
+    const cart = await Cart.findById(request.body.id)
     cart.games.map(game => {
-        if(game._id == request.params.gameid){
+        if(game._id == request.body.gameid){
             if (game.Quantity > 1){
                 game.Quantity -= 1
                 cart.save()
                 return response.send(cart)
             }
             else{
-                Cart.findOneAndUpdate({id: request.params.id}, {$pull: {games: {_id: request.params.gameid}}})
-                .then(() => {response.sendStatus(200)})
+                Cart.findOneAndUpdate({id: request.body.id}, {$pull: {games: {_id: request.body.gameid}}})
+                .then(() => {response.sendStatus(200).send(cart)})
                 .catch(() => response.status(404).end())
             }
         }
     })
+})
+
+//Validation du panier
+app.post("/checkout", async (request, response) => {
+    const cart = await Cart.findById(request.body.id)
+
+    if(cart.games.length == 0) {
+        response.sendStatus(500).send("Impossible de valider votre commande, votre panier est vide.")
+    } else {  
+        
+        const address = request.body.address
+        let content = []
+
+        cart.games.map(game => {
+            content.push([game.Name, game.Quantity])
+        })
+
+        await Cart.findOneAndUpdate({"_id": request.body.id}, {$set: {games: []}})
+
+        return response.json({ address: address, content: content})
+    }
+
+
 })
 
 // Lancement du serveur
