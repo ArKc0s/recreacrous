@@ -184,7 +184,7 @@ app.post("/checkout", async (request, response) => {
     const cart = await Cart.findById(request.body.id)
 
     if(cart.games.length == 0) {
-        response.sendStatus(500).send("Impossible de valider votre commande, votre panier est vide.")
+        response.sendStatus(500)
     } else {  
         
         const address = request.body.address
@@ -198,8 +198,6 @@ app.post("/checkout", async (request, response) => {
 
         return response.json({ address: address, content: content})
     }
-
-
 })
 
 // Lancement du serveur
