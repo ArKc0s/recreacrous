@@ -29,6 +29,7 @@ const gameSchema = new Schema({
     Image: String
 });
 
+
 const gamesincartSchema = new Schema({
     Name: String,
     Price: Number,
@@ -70,6 +71,12 @@ const Cart = mongoose.model("Cart", cartSchema);
 //     console.log("Error while inserting data")
 // });
 
+
+
+
+
+
+
 // Création du serveur et initialisation
 const app = express()
 app.use(express.json())
@@ -79,6 +86,7 @@ app.use(express.json())
 // Récupérer tous les jeux
 app.get("/games", (request, response) => {
     Games.find()
+    .select("Name Price Rating Image")
     .then((games) => {response.send(games)})
     .catch(() => response.status(404).end())
 })
